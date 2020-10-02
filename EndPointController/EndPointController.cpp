@@ -20,7 +20,8 @@ enum OPTION
 {
 	OPTION_LIST_DEVICES,
 	OPTION_SET_BY_INDEX,
-	OPTION_SET_BY_FRIENDLY_NAME
+	OPTION_SET_BY_FRIENDLY_NAME,
+	OPTION_SET_BY_DEVICE_ID
 };
 
 typedef struct TGlobalState
@@ -29,6 +30,7 @@ typedef struct TGlobalState
 	int option;
 	int indexFilter;
 	std::wstring nameFilter;
+	std::wstring idFilter;
 	IMMDeviceEnumerator *pEnum;
 	IMMDeviceCollection *pDevices;
 	LPWSTR strDefaultDeviceID;
@@ -75,8 +77,10 @@ int _tmain(int argc, LPCWSTR argv[])
 			wprintf_s(_T("                                               devices that are enabled.\n"));
 			wprintf_s(_T("  EndPointController.exe device_index          Sets the default playvack device\n"));
 			wprintf_s(_T("                                               with the given index.\n"));
-			wprintf_s(_T("  EndPointController.exe -n friendly_name      Sets the default playvack device\n"));
+			wprintf_s(_T("  EndPointController.exe -n friendly_name      Sets the default playback device\n"));
 			wprintf_s(_T("                                               with the given friendly name.\n"));
+			wprintf_s(_T("  EndPointController.exe -id device_id         Sets the default playback device\n"));
+			wprintf_s(_T("                                               with the given device id.\n"));
 			wprintf_s(_T("\n"));
 			wprintf_s(_T("OPTIONS\n"));
 			wprintf_s(_T("  -a             Display all devices, rather than just active devices.\n"));
@@ -136,7 +140,29 @@ int _tmain(int argc, LPCWSTR argv[])
 				break;
 			} else
 			{
-				wprintf_s(_T("Missing name string"));
+				wprintf_s(_T("Missing friendly_name string"));
+				exit(1);
+			}
+		}
+		else if (wcscmp(argv[i], _T("-id")) == 0)
+		{
+			if ((argc - i) >= 2) {
+				//printf("argc %d\n", argc);
+				state.option = OPTION_SET_BY_DEVICE_ID;
+				state.idFilter = argv[++i];
+				if (state.idFilter[0] == L'"')
+				{
+					state.idFilter.erase(0);
+				}
+				if (state.idFilter[state.idFilter.length() - 1] == L'"')
+				{
+					state.idFilter.erase(state.nameFilter.length() - 1);
+				}
+				break;
+			}
+			else
+			{
+				wprintf_s(_T("Missing device_id string"));
 				exit(1);
 			}
 		}
@@ -186,7 +212,7 @@ void enumerateOutputDevices(TGlobalState* state)
 	state->pDevices->GetCount(&count);
 
 	// If option is less than 1, list devices
-	if (state->option == OPTION_LIST_DEVICES) 
+	if (state->option == OPTION_LIST_DEVICES)
 	{
 
 		// Get default device
@@ -194,7 +220,6 @@ void enumerateOutputDevices(TGlobalState* state)
 		state->hr = state->pEnum->GetDefaultAudioEndpoint(eRender, eMultimedia, &pDefaultDevice);
 		if (SUCCEEDED(state->hr))
 		{
-			
 			state->hr = pDefaultDevice->GetId(&state->strDefaultDeviceID);
 
 			// Iterate all devices
@@ -256,6 +281,30 @@ void enumerateOutputDevices(TGlobalState* state)
 							state->pCurrentDevice->Release();
 							break;
 						}
+					}
+				}
+				state->pCurrentDevice->Release();
+			}
+		}
+	}
+	else if (state->option == OPTION_SET_BY_DEVICE_ID)
+	{
+		// Iterate all devices
+		for (int i = 1; i <= (int)count; i++)
+		{
+			state->hr = state->pDevices->Item(i - 1, &state->pCurrentDevice);
+			if (SUCCEEDED(state->hr))
+			{
+				LPWSTR strID = NULL;
+				state->hr = state->pCurrentDevice->GetId(&strID);
+				if (SUCCEEDED(state->hr))
+				{
+					if (state->idFilter.compare(strID) == 0)
+					{
+						//printf("%ws == %ws\n", state->idFilter.c_str(), strID);
+						state->hr = SetDefaultAudioPlaybackDevice(strID);
+						state->pCurrentDevice->Release();
+						break;
 					}
 				}
 				state->pCurrentDevice->Release();
