@@ -92,9 +92,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PolicyConfig.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EndPointController.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="EndPointController.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
