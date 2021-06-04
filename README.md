@@ -34,3 +34,7 @@ A Windows command-line program for listing audio end-points and setting the defa
 					   - Device description (wstring)
 					   - Device interface friendly name (wstring)
 					   - Device ID (wstring)
+   	> EndPointController.exe -f "%d %ws %d %d %ws %ws %ws"
+	1 Головной телефон (Mi Pocket Speaker 2 Hands-Free AG Audio) 8 0 Головной телефон Mi Pocket Speaker 2 Hands-Free AG Audio {0.0.0.00000000}.{0016c7f4-0a72-43dd-a83e-aca1a4fb1c67}
+	2  4 0 Digital Audio (HDMI)  {0.0.0.00000000}.{02af2d4f-2cd6-421a-9fc8-3ba3cc9cbb76}
+	
