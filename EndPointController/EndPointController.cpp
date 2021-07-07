@@ -51,6 +51,7 @@ void invalidParameterHandler(const wchar_t* expression, const wchar_t* function,
 // EndPointController.exe [NewDefaultDeviceID]
 int _tmain(int argc, LPCWSTR argv[])
 {
+	setlocale(LC_ALL, "");
 	TGlobalState state;
 
 	// Set the locale to system's locale
